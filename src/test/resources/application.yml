@@ -1,0 +1,36 @@
+spring:
+  h2:
+    console:
+      enabled: true
+  flyway:
+    enabled: true
+    schemas: ''
+    user: sa
+    password: ''
+    locations: classpath:db/migration, classpath:db/testdata
+    url: jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=TRUE;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE,USER;DATABASE_TO_UPPER=false;IGNORECASE=TRUE;
+    table: flyway_schema_history
+    clean-disabled: false
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+    url: jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=TRUE;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE,USER;DATABASE_TO_UPPER=false;IGNORECASE=TRUE;
+    hikari:
+      maximumPoolSize: 50
+  jpa:
+
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+    properties:
+      hibernate:
+        ddl-auto: none
+        highlight_sql: true
+        format_sql: true
+logging:
+  level:
+    root: ERROR

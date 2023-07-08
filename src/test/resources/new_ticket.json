@@ -1,0 +1,14 @@
+{
+  "title":"title",
+  "description":"description",
+  "reference": "15kOTS9IZe",
+  "priority":"HIGH",
+  "assignedUserId":"email1@mail.com",
+  "departmentId": "",
+  "categoryId":"categoryName",
+  "estimation":5,
+  "startedOn":"2022-11-10T15:05:00",
+  "resolvedOn":"2023-01-19T00:00:14.1759198",
+  "status": "OPEN",
+  "createdByUserId":""
+}
