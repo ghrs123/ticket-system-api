@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import be.congregationchretienne.ticketsystem.api.dto.UserDTO;
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
 import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.helper.ValidationHelper;
 import be.congregationchretienne.ticketsystem.api.model.User;
 import be.congregationchretienne.ticketsystem.api.repository.UserRepository;
 import be.congregationchretienne.ticketsystem.api.service.UserService;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.test.annotation.FlywayTest;
@@ -26,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
@@ -48,38 +49,30 @@ class UserServiceImplIT {
   private static Stream<Arguments> invalidIds() {
     String nullVar = null;
     return Stream.of(
-        Arguments.of(nullVar, "The resource reference must be not null."),
-        Arguments.of("", "The resource reference must be not null."),
-        Arguments.of("  ", "The resource reference must be not null."),
-        Arguments.of("123", "The resource reference is invalid."));
+        Arguments.of(nullVar, "The resource reference [null] must be not null."),
+        Arguments.of("", "The resource reference [] must be not null."),
+        Arguments.of("  ", "The resource reference [  ] must be not null."),
+        Arguments.of("123", "The resource reference [123] is invalid, must be the UUID format."));
   }
 
   private static Stream<Arguments> IllegalParameterOderBy() {
     String nullVar = null;
     return Stream.of(
-        Arguments.of(nullVar, 50, "The parameter orderBy [null] is invalid."),
-        Arguments.of("ASC", 51, "The number items per page should be between 1 and 50."),
-        Arguments.of(" ", 50, "The parameter orderBy [ ] is invalid."));
+        Arguments.of(
+            "Namee", 50, "No property 'namee' found for type 'User' Did you mean ''name''"));
+  }
+
+  private static Stream<Arguments> IllegalParameterPageSize() {
+    return Stream.of(
+        Arguments.of("ASC", 0, "The number of items per page should be between 1 and 50."),
+        Arguments.of("ASC", 51, "The number of items per page should be between 1 and 50."));
   }
 
   private static Stream<Arguments> invalidDeleteIds() {
     String nullVar = null;
     return Stream.of(
-        Arguments.of(nullVar, "The resource reference must be not null."),
-        Arguments.of("1212", "The resource reference is invalid."));
-  }
-
-  @Test
-  void testGetUserOk() {
-    // given
-    var uuid = UUID.fromString("9c345098-0d0c-419c-bcdf-05c0810f295f");
-
-    // when
-    var result = userService.get(uuid.toString());
-
-    // Then
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(uuid.toString(), result.getId());
+        Arguments.of(nullVar, "The resource reference [null] must be not null."),
+        Arguments.of("1212", "The resource reference [1212] is invalid, must be the UUID format."));
   }
 
   @ParameterizedTest
@@ -135,15 +128,31 @@ class UserServiceImplIT {
   @MethodSource("IllegalParameterOderBy")
   void testGetUserPaginationWithIllegalParameterOderBy(
       String text, int pageSie, String expectedMessage) {
-
     // given
-
     // when
     Exception exception =
         assertThrows(
-            IllegalArgumentException.class,
+            PropertyReferenceException.class,
             () -> {
               Page<UserDTO> user = userService.getAll(0, pageSie, text, "ASC");
+            });
+    // Then
+    assertThat(exception).hasMessage(expectedMessage);
+  }
+
+  @Test
+  void testGetCategoryPaginationWithOderByNull() {
+
+    // given
+    String orderBy = null;
+    int pageSize = 0;
+    String expectedMessage = "The number of items per page should be between 1 and 50.";
+    // when
+    RuntimeException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              userService.getAll(0, pageSize, orderBy, "ASC");
             });
     // Then
     assertThat(exception).hasMessage(expectedMessage);
@@ -155,7 +164,6 @@ class UserServiceImplIT {
 
     // given
     var title = "Name User" + System.currentTimeMillis();
-
     UserDTO user = new UserDTO(title, "user@mail.com");
     // when
     userService.create(user);
@@ -180,6 +188,22 @@ class UserServiceImplIT {
 
   @ParameterizedTest
   @MethodSource("invalidDeleteIds")
+  void testDeleteCategoryValidId(String id, String expectedMessage) {
+    // given
+    // When
+    RuntimeException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              userService.delete(id);
+            });
+
+    // Then
+    assertThat(exception).hasMessage(expectedMessage);
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidDeleteIds")
   void testDeleteDepartmentWithInvalidId(String id, String expectedMessage) {
     // given
     // When
@@ -196,7 +220,7 @@ class UserServiceImplIT {
 
   @Test
   @Transactional
-  void testDeleteUser() {
+  void testDeleteUserForValidNotFoundId() {
     // given
     var id = "9c345098-0d0c-419c-bcdf-05c0810f295f";
     String expectedMessage =

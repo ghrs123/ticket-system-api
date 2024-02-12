@@ -1,0 +1,5 @@
+FROM openjdk
+
+COPY target/ticket-system-api-0.0.1-SNAPSHOT.jar /app/ticket-system.jar
+WORKDIR /app
+ENTRYPOINT ["java","-jar","ticket-system.jar"]

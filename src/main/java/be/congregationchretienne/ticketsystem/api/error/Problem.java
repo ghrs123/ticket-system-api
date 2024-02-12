@@ -23,7 +23,7 @@ public final class Problem {
 
   private String path;
 
-  private List<ProblemDetail> invalidParameters;
+  private List<ProblemDetail> invalidParameters = new ArrayList<>();
 
   private Problem(ProblemBuilder builder) {
     this.eventId = builder.eventId;
@@ -47,7 +47,7 @@ public final class Problem {
 
     private String path;
 
-    private List<ProblemDetail> invalidParameters;
+    private List<ProblemDetail> invalidParameters = new ArrayList<>();
 
     public static ProblemBuilder newInstance() {
       return new ProblemBuilder();

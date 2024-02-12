@@ -24,12 +24,18 @@ public class User extends AbstractModel {
   @Column(name = "email", length = 255, unique = true)
   private String email;
 
-  @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL)
+  @OneToMany(
+      mappedBy = "assignedTo",
+      cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE})
   private Set<Ticket> ticketsAssignedToMe = new HashSet<>();
 
-  @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
-  private Set<Ticket> ticketsCreatedByMe;
+  @OneToMany(
+      mappedBy = "createdBy",
+      cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE})
+  private Set<Ticket> ticketsCreatedByMe = new HashSet<>();
 
-  @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL)
+  @ManyToMany(
+      mappedBy = "users",
+      cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE})
   private Set<Department> myDepartments = new HashSet<>();
 }

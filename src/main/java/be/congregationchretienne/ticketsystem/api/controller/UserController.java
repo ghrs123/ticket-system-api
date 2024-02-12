@@ -1,13 +1,13 @@
 package be.congregationchretienne.ticketsystem.api.controller;
 
 import be.congregationchretienne.ticketsystem.api.dto.UserDTO;
+import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.service.UserService;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -19,7 +19,8 @@ public class UserController {
   @Autowired private UserService userService;
 
   @GetMapping(path = USER_ENDPOINT_ID)
-  public ResponseEntity<Object> getUser(@PathVariable(value = "id") String id) {
+  public ResponseEntity<Object> getUser(@PathVariable(value = "id") String id)
+      throws NotFoundException {
 
     UserDTO user = userService.get(id);
 
@@ -39,7 +40,7 @@ public class UserController {
   }
 
   @PostMapping(path = USER_ENDPOINT)
-  public ResponseEntity createUser(@RequestBody UserDTO userDTO) {
+  public ResponseEntity createUser(@Valid UserDTO userDTO) {
 
     userService.create(userDTO);
 
@@ -47,14 +48,14 @@ public class UserController {
   }
 
   @PutMapping(path = USER_ENDPOINT_ID)
-  public ResponseEntity updateUser(UserDTO userDTO) {
+  public ResponseEntity updateUser(@Valid UserDTO userDTO) {
     userService.update(userDTO);
 
     return new ResponseEntity<>("The resource was successfully updated.", HttpStatus.OK);
   }
 
   @DeleteMapping(path = USER_ENDPOINT_ID)
-  public ResponseEntity deleteUser(@RequestParam String id) {
+  public ResponseEntity deleteUser(@PathVariable(value = "id") String id) {
     userService.delete(id);
 
     return new ResponseEntity<>("The resource was successfully deleted.", HttpStatus.OK);

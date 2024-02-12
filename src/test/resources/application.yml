@@ -19,7 +19,6 @@ spring:
     hikari:
       maximumPoolSize: 50
   jpa:
-
     generate-ddl: true
     hibernate:
       ddl-auto: create

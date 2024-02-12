@@ -3,6 +3,9 @@ package be.congregationchretienne.ticketsystem.api.service.impl;
 import static be.congregationchretienne.ticketsystem.api.mapping.TicketMapping.INSTANCE_TICKET;
 
 import be.congregationchretienne.ticketsystem.api.dto.TicketDTO;
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
+import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
+import be.congregationchretienne.ticketsystem.api.exception.PropertyReferenceException;
 import be.congregationchretienne.ticketsystem.api.helper.ValidationHelper;
 import be.congregationchretienne.ticketsystem.api.mapping.CycleAvoidingMappingContext;
 import be.congregationchretienne.ticketsystem.api.model.Ticket;
@@ -15,7 +18,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -36,7 +41,11 @@ public class TicketServiceImpl extends AbstractServiceImpl<TicketDTO> implements
   public TicketDTO get(String id) {
     var uuid = checkAndConvertID(id);
 
-    Optional<Ticket> ticket = repository.findById(uuid);
+    Optional<Ticket> ticket =
+        Optional.ofNullable(
+            repository
+                .findById(uuid)
+                .orElseThrow(() -> new NotFoundException("Ticket not founded.")));
 
     return INSTANCE_TICKET.entityToDTO(ticket.get(), new CycleAvoidingMappingContext());
   }
@@ -45,22 +54,44 @@ public class TicketServiceImpl extends AbstractServiceImpl<TicketDTO> implements
   @Override
   public Page<TicketDTO> getAll(Integer page, Integer pageSize, String orderBy, String sort) {
 
-    var pageable = getPageable(page, pageSize, orderBy, sort);
+    Pageable pageable = null;
+    Page<Ticket> tickets = null;
 
-    Page<Ticket> ticket = repository.findAll(pageable);
-    ValidationHelper.requireNonNull(ticket);
+    try {
 
-    return ticket.map(
+      pageable = getPageable(page, pageSize, orderBy, sort);
+      tickets = repository.findAll(pageable);
+
+    } catch (IllegalArgumentException exception) {
+
+      throw new IllegalArgumentException(exception.getMessage());
+    } catch (PropertyReferenceException exception) {
+
+      throw new PropertyReferenceException(
+          String.format("No property [%s] found for type 'Ticket'.", orderBy));
+    }
+
+    ValidationHelper.requireNonNull(tickets);
+
+    return tickets.map(
         currentTicket ->
             (INSTANCE_TICKET.entityToDTO(currentTicket, new CycleAvoidingMappingContext())));
   }
 
   @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void create(TicketDTO bean) {
 
     ValidationHelper.requireNonNull(bean);
     Ticket ticket = INSTANCE_TICKET.dtoToEntity(bean, new CycleAvoidingMappingContext());
     ticket.setCreatedAt(LocalDateTime.now());
+
+    boolean present = repository.findByReference(ticket.getReference()).isPresent();
+
+    if (present) {
+      throw new IllegalArgumentException(
+          String.format("Ticket with reference [%s] already exists.", ticket.getReference()));
+    }
 
     repository.save(ticket);
   }

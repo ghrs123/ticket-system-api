@@ -1,5 +1,6 @@
 package be.congregationchretienne.ticketsystem.api.helper;
 
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
 import org.apache.commons.lang3.StringUtils;
 
 public class ValidationHelper {

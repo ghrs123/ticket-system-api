@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  #api_service:
+    #build: .
+    #restart: always
+    #ports:
+      #- 8080:8080
+    #networks:
+      #- springapimysql-net
+    #environment:
+      #- spring.datasource.url=jdbc:mysql://localhost:3306/ticketsystemapi?autoReconnect=TRUE&useSSL=FALSE?allowPublicKeyRetrieval=false&useSSL=false
+    #depends_on:
+      #- mysqldb
+
+    #volumes:
+      #- .m2:/root/.m2*/--
+
+  mysqldb:
+    image: "mysql:8.0"
+    hostname: mysql
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - ticket-systems
+    environment:
+      MYSQL_DATABASE: ticketsystemapi
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Bia8ha77%
+      MYSQL_ROOT_PASSWORD: Bia8ha77%
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./src/main/resources/db/migration/V1_0__create.sql:/data/application/V1_0__create.sql
+      - /D:/workspaces/ccb-ticket-system/src/main/resources/scripts/V1_1__insert.sql"
+
+volumes:
+  db_data:
+
+networks:
+  ticket-systems:

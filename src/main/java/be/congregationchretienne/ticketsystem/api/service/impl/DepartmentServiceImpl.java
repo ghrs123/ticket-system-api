@@ -1,22 +1,23 @@
 package be.congregationchretienne.ticketsystem.api.service.impl;
 
 import static be.congregationchretienne.ticketsystem.api.mapping.DepartmentMapping.INSTANCE_DEPARTMENT;
-import static be.congregationchretienne.ticketsystem.api.mapping.TicketMapping.INSTANCE_TICKET;
 
 import be.congregationchretienne.ticketsystem.api.dto.DepartmentDTO;
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
+import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
+import be.congregationchretienne.ticketsystem.api.exception.PropertyReferenceException;
 import be.congregationchretienne.ticketsystem.api.helper.ValidationHelper;
 import be.congregationchretienne.ticketsystem.api.mapping.CycleAvoidingMappingContext;
 import be.congregationchretienne.ticketsystem.api.model.Department;
-import be.congregationchretienne.ticketsystem.api.model.Ticket;
 import be.congregationchretienne.ticketsystem.api.repository.DepartmentRepository;
 import be.congregationchretienne.ticketsystem.api.service.DepartmentService;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,11 @@ public class DepartmentServiceImpl extends AbstractServiceImpl<DepartmentDTO>
   public DepartmentDTO get(String id) {
     var uuid = checkAndConvertID(id);
 
-    Optional<Department> department = repository.findById(uuid);
+    Optional<Department> department =
+        Optional.ofNullable(
+            repository
+                .findById(uuid)
+                .orElseThrow(() -> new NotFoundException("Department not founded.")));
 
     return INSTANCE_DEPARTMENT.entityToDTO(department.get(), new CycleAvoidingMappingContext());
   }
@@ -48,9 +53,23 @@ public class DepartmentServiceImpl extends AbstractServiceImpl<DepartmentDTO>
   @Transactional(readOnly = true)
   public Page<DepartmentDTO> getAll(Integer page, Integer pageSize, String orderBy, String sort) {
 
-    var pageable = getPageable(page, pageSize, orderBy, sort);
+    Page<Department> departments = null;
+    Pageable pageable = null;
 
-    Page<Department> departments = repository.findAll(pageable);
+    try {
+
+      pageable = getPageable(page, pageSize, orderBy, sort);
+      departments = repository.findAll(pageable);
+
+    } catch (IllegalArgumentException exception) {
+
+      throw new IllegalArgumentException(exception.getMessage());
+    } catch (PropertyReferenceException exception) {
+
+      throw new PropertyReferenceException(
+          String.format("No property [%s] found for type 'Department'.", orderBy));
+    }
+
     ValidationHelper.requireNonNull(departments);
 
     return departments.map(
@@ -66,6 +85,13 @@ public class DepartmentServiceImpl extends AbstractServiceImpl<DepartmentDTO>
     ValidationHelper.requireNonNull(bean);
     var department = INSTANCE_DEPARTMENT.dtoToEntity(bean);
     department.setCreatedAt(LocalDateTime.now());
+
+    boolean present = repository.findByNameIgnoreCase(department.getName()).isPresent();
+
+    if (present) {
+      throw new IllegalArgumentException(
+          String.format("Department [%s] already exists.", department.getName()));
+    }
 
     repository.save(department);
   }

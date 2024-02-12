@@ -4,13 +4,13 @@ import org.springframework.data.domain.Page;
 
 public interface AbstractService<T> {
 
-    T get(String id);
+  T get(String id);
 
-    Page<T> getAll(Integer page, Integer pageSize, String orderBy, String sort);
+  Page<T> getAll(Integer page, Integer pageSize, String orderBy, String sort);
 
-    void create(T bean);
+  void create(T bean);
 
-    void update(T bean);
+  void update(T bean);
 
-    void delete(String id);
+  void delete(String id);
 }

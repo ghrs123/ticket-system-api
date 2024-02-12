@@ -31,15 +31,15 @@ public class Ticket extends AbstractModelForCreatedBy {
   @Column(name = "priority", length = 10)
   private Priority priority;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "assigned_to_fk")
   private User assignedTo;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "department_fk")
   private Department department;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "category_fk")
   private Category category;
 

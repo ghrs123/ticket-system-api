@@ -10,8 +10,6 @@ public interface TicketMapping {
 
   TicketMapping INSTANCE_TICKET = Mappers.getMapper(TicketMapping.class);
 
-  @Mapping(source = "createdBy", target = "createdBy")
-  @Mapping(source = "assignedTo", target = "assignedTo")
   TicketDTO entityToDTO(Ticket ticket, @Context CycleAvoidingMappingContext context);
 
   // Set<TicketDTO> entityToDTO(Set<Ticket> tickets);
