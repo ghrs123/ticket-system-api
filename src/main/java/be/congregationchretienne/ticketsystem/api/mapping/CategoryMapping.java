@@ -5,9 +5,10 @@ import be.congregationchretienne.ticketsystem.api.model.Category;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapping {
 
   CategoryMapping INSTANCE_CATEGORY = Mappers.getMapper(CategoryMapping.class);

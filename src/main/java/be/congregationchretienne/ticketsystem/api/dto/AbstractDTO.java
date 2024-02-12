@@ -1,11 +1,13 @@
 package be.congregationchretienne.ticketsystem.api.dto;
 
 import java.time.LocalDateTime;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 public class AbstractDTO {
-  @NotNull String id;
+  String id;
+
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
   LocalDateTime createdAt;
 }

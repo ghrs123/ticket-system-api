@@ -1,18 +1,15 @@
 package be.congregationchretienne.ticketsystem.api;
 
+import be.congregationchretienne.ticketsystem.api.exception.RestExceptionHandler;
 import be.congregationchretienne.ticketsystem.api.model.*;
-import be.congregationchretienne.ticketsystem.api.model.type.Priority;
-import be.congregationchretienne.ticketsystem.api.model.type.Status;
 import be.congregationchretienne.ticketsystem.api.repository.*;
-import java.time.LocalDateTime;
 import javax.persistence.EntityManager;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+@Import(RestExceptionHandler.class)
 @Component
 @SpringBootApplication
 public class TicketSystemApiApplication {
@@ -20,54 +17,58 @@ public class TicketSystemApiApplication {
   EntityManager entityManager;
 
   public static void main(String[] args) {
-    new TicketSystemApiApplication().exec(args);
+    // new TicketSystemApiApplication().exec(args);
+    SpringApplication.run(TicketSystemApiApplication.class, args);
   }
 
-  private void exec(String[] args) {
-    var context = SpringApplication.run(TicketSystemApiApplication.class, args);
-    UserRepository userRepository = context.getBean(UserRepository.class);
-    TicketRepository ticketRepository = context.getBean(TicketRepository.class);
-    CategoryRepository categoryRepository = context.getBean(CategoryRepository.class);
-    DepartmentRepository departmentRepository = context.getBean(DepartmentRepository.class);
+  /* private void exec(String[] args) {
+      var context = SpringApplication.run(TicketSystemApiApplication.class, args);
+      UserRepository userRepository = context.getBean(UserRepository.class);
+      TicketRepository ticketRepository = context.getBean(TicketRepository.class);
+      CategoryRepository categoryRepository = context.getBean(CategoryRepository.class);
+      DepartmentRepository departmentRepository = context.getBean(DepartmentRepository.class);
 
-    User user = new User();
-    user.setEmail(System.currentTimeMillis() + "-gustavo@email.com");
-    user.setName("User2 test");
-    userRepository.save(user);
+      User user = new User();
+      user.setEmail(System.currentTimeMillis() + "-gustavo@email.com");
+      user.setName("User2 test");
 
-    Department department = new Department();
-    department.setName("Informatique");
-    department.setCreatedBy(user);
+      Department department = new Department();
+      department.setName("Informatique");
+      department.setCreatedBy(user);
+      userRepository.save(user);
+      user.getMyDepartments().add(department);
 
-    Category category = new Category();
-    category.setCreatedBy(user);
-    category.setName("Suporte");
 
-    department.getCategories().add(category);
-    category.getDepartments().add(department);
-    department.getUsers().add(user);
-    user.getMyDepartments().add(department);
-    categoryRepository.save(category);
-    departmentRepository.save(department);
+      Category category = new Category();
+      category.setCreatedBy(user);
+      category.setName("Suporte");
+      category.getDepartments().add(department);
+      categoryRepository.save(category);
 
-    Ticket ticket = new Ticket();
-    ticket.setTitle("My task title 2");
-    ticket.setDescription("Category 2");
-    ticket.setStartedOn(LocalDateTime.now());
-    ticket.setAssignedTo(user);
-    ticket.setCreatedBy(user);
-    ticket.setReference(RandomStringUtils.randomAlphanumeric(10, 11));
-    ticket.setPriority(Priority.HIGH);
-    ticket.setEstimation(3);
-    ticket.setStatus(Status.OPEN);
-    ticket.setCategory(category);
-    ticket.setDepartment(department);
-    ticketRepository.save(ticket);
+      department.getCategories().add(category);
+      department.getUsers().add(user);
+      departmentRepository.save(department);
 
-    var list = ticketRepository.findAll();
+      Ticket ticket = new Ticket();
+      ticket.setTitle("My task title 2");
+      ticket.setDescription("Category 2");
+      ticket.setStartedOn(LocalDateTime.now());
+      ticket.setAssignedTo(user);
+      ticket.setCreatedBy(user);
+      ticket.setReference(RandomStringUtils.randomAlphanumeric(10, 11));
+      ticket.setPriority(Priority.HIGH);
+      ticket.setEstimation(3);
+      ticket.setStatus(Status.OPEN);
+      ticket.setCategory(category);
+      ticket.setDepartment(department);
+      ticketRepository.save(ticket);
 
-    log.info("list", list);
-  }
+  //    var depart = departmentRepository.findAll();
+  //    var cat = categoryRepository.findAll();
+  //    var list = ticketRepository.findAll();
+
+  //.info("list", list);
+    }*/
 
   /*
   public static void main(String[] args) {

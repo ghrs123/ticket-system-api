@@ -63,6 +63,12 @@ public class ProblemDetail {
       return this;
     }
 
+    public Builder value(String value) {
+      this.value = value;
+
+      return this;
+    }
+
     public Builder code(String code) {
       this.code = code;
 

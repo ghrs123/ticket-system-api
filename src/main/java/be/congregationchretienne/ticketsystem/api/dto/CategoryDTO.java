@@ -1,12 +1,11 @@
 package be.congregationchretienne.ticketsystem.api.dto;
 
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Setter
 @Getter
@@ -14,8 +13,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class CategoryDTO extends AbstractDTO {
 
-    @NotNull String name;
-    Set<TicketDTO> tickets;
-    Set<DepartmentDTO> departments;
-    UserDTO createdBy;
+  @NotNull String name;
+  Set<TicketDTO> tickets;
+  Set<DepartmentDTO> departments;
+  UserDTO createdBy;
 }

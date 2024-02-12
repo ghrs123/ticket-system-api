@@ -3,10 +3,7 @@ package be.congregationchretienne.ticketsystem.api.model;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -18,12 +15,15 @@ public class Category extends AbstractModelForCreatedBy {
 
   public static final long serialVersionUID = 1L;
 
-  @Column(name = "name", nullable = false)
+  @Column(name = "name", nullable = false, unique = true)
   private String name;
 
-  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "category", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private Set<Ticket> tickets = new HashSet<>();
 
-  @ManyToMany(mappedBy = "categories", cascade = CascadeType.REMOVE)
+  @ManyToMany(
+      mappedBy = "categories",
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE})
   private Set<Department> departments = new HashSet<>();
 }

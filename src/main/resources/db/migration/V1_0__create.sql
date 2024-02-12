@@ -15,6 +15,14 @@
         primary key (id)
     );
 
+     create table users (
+       id varchar(255) not null,
+        created_at datetime not null,
+        email varchar(255),
+        name varchar(255) not null,
+        primary key (id)
+    );
+
     create table departments_categories (
        department_fk varchar(255) not null,
         category_fk varchar(255) not null,
@@ -42,14 +50,6 @@
         category_fk varchar(255),
         created_by_fk varchar(255),
         department_fk varchar(255),
-        primary key (id)
-    );
-
-    create table users (
-       id varchar(255) not null,
-        created_at datetime not null,
-        email varchar(255),
-        name varchar(255) not null,
         primary key (id)
     );
 

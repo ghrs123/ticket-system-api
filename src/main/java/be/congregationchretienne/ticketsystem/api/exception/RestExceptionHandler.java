@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
@@ -27,26 +29,46 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+@ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-  @ExceptionHandler(NotFoundException.class)
+  @ExceptionHandler(value = {NotFoundException.class})
   public ResponseEntity<Object> handleNotFoundException(
       NotFoundException exception, WebRequest request) {
-
+    // 1. Create payload containing exception details
+    // 2. Return response entity
     var problem =
         new Problem.ProblemBuilder()
             .eventId(exception.getEventId())
             .title("Resource not found.")
             .message(exception.getMessage())
             .status(NOT_FOUND)
+            .path(request.getContextPath())
             .build();
 
     return new ResponseEntity<>(problem, NOT_FOUND);
   }
 
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<Problem> handleIllegalArgumentException(
+  @ExceptionHandler(value = {IllegalArgumentException.class})
+  public ResponseEntity<Object> handleIlligalArgumentException(
       IllegalArgumentException exception, WebRequest request) {
+
+    var problem =
+        new Problem.ProblemBuilder()
+            .eventId(exception.getEventId())
+            .title("Invalid parameter.")
+            .message(exception.getMessage())
+            .status(BAD_REQUEST)
+            .build();
+
+    return new ResponseEntity<>(problem, BAD_REQUEST);
+  }
+
+  // ========== 400
+  @ExceptionHandler(value = {BadRequestException.class})
+  @Nullable
+  public ResponseEntity<Problem> handleBadRequestException(
+      BadRequestException exception, WebRequest request) {
 
     var problemDetail = new ProblemDetail.Builder().reason(exception.getMessage()).build();
 
@@ -55,16 +77,16 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             .eventId(exception.getEventId())
             .title("Resource not found.")
             .message(exception.getMessage())
-            .status(NOT_FOUND)
+            .status(BAD_REQUEST)
             .build();
 
     return new ResponseEntity<>(problem, BAD_REQUEST);
   }
 
-  // ========== 400
-  @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<Problem> handleBadRequestException(
-      BadRequestException exception, WebRequest request) {
+  @ExceptionHandler(value = {PropertyReferenceException.class})
+  @Nullable
+  public ResponseEntity<Problem> handleBadParameterException(
+      PropertyReferenceException exception, WebRequest request) {
 
     var problemDetail = new ProblemDetail.Builder().reason(exception.getMessage()).build();
 

@@ -9,6 +9,7 @@ import be.congregationchretienne.ticketsystem.api.dto.TicketDTO;
 import be.congregationchretienne.ticketsystem.api.dto.UserDTO;
 import be.congregationchretienne.ticketsystem.api.dto.type.PriorityDTO;
 import be.congregationchretienne.ticketsystem.api.dto.type.StatusDTO;
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
 import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.helper.ValidationHelper;
 import be.congregationchretienne.ticketsystem.api.model.Ticket;
@@ -19,7 +20,6 @@ import be.congregationchretienne.ticketsystem.api.service.TicketService;
 import be.congregationchretienne.ticketsystem.api.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.test.annotation.FlywayTest;
@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
@@ -63,41 +63,31 @@ class TicketServiceImplIT {
     flyway.migrate();
   }
 
-  @Test
-  void testGetTicketOk() {
-    // given
-    var uuid = UUID.fromString("082722c7-856f-4a39-b8dd-20cb08a6996c");
-
-    // when
-    var result = ticketService.get(uuid.toString());
-
-    // Then
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(uuid.toString(), result.getId());
-  }
-
   private static Stream<Arguments> invalidIds() {
     String nullVar = null;
     return Stream.of(
-        Arguments.of(nullVar, "The resource reference must be not null."),
-        Arguments.of("", "The resource reference must be not null."),
-        Arguments.of("  ", "The resource reference must be not null."),
-        Arguments.of("123", "The resource reference is invalid."));
+        Arguments.of(nullVar, "The resource reference [null] must be not null."),
+        Arguments.of("", "The resource reference [] must be not null."),
+        Arguments.of("  ", "The resource reference [  ] must be not null."),
+        Arguments.of("123", "The resource reference [123] is invalid, must be the UUID format."));
   }
 
   private static Stream<Arguments> IllegalParameterOderBy() {
     String nullVar = null;
+    return Stream.of(Arguments.of("Namee", 50, "No property 'namee' found for type 'Ticket'"));
+  }
+
+  private static Stream<Arguments> IllegalParameterPageSize() {
     return Stream.of(
-        Arguments.of(nullVar, 50, "The parameter orderBy [null] is invalid."),
-        Arguments.of("ASC", 51, "The number items per page should be between 1 and 50."),
-        Arguments.of(" ", 50, "The parameter orderBy [ ] is invalid."));
+        Arguments.of("ASC", 0, "The number of items per page should be between 1 and 50."),
+        Arguments.of("ASC", 51, "The number of items per page should be between 1 and 50."));
   }
 
   private static Stream<Arguments> invalidDeleteIds() {
     String nullVar = null;
     return Stream.of(
-        Arguments.of(nullVar, "The resource reference must be not null."),
-        Arguments.of("1212", "The resource reference is invalid."));
+        Arguments.of(nullVar, "The resource reference [null] must be not null."),
+        Arguments.of("1212", "The resource reference [1212] is invalid, must be the UUID format."));
   }
 
   @ParameterizedTest
@@ -150,6 +140,22 @@ class TicketServiceImplIT {
   }
 
   @ParameterizedTest
+  @MethodSource("IllegalParameterPageSize")
+  void testGetCategoryPaginationWithIllegalParameterPageSize(
+      String orderBy, int pageSize, String expectedMessage) {
+    // given
+    // when
+    RuntimeException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              ticketService.getAll(0, pageSize, orderBy, "ASC");
+            });
+    // Then
+    assertThat(exception).hasMessage(expectedMessage);
+  }
+
+  @ParameterizedTest
   @MethodSource("IllegalParameterOderBy")
   void testGetTicketPaginationWithIllegalParameterOderBy(
       String text, int pageSie, String expectedMessage) {
@@ -158,9 +164,27 @@ class TicketServiceImplIT {
     // when
     Exception exception =
         assertThrows(
+            PropertyReferenceException.class,
+            () -> {
+              ticketService.getAll(0, pageSie, text, "ASC");
+            });
+    // Then
+    assertThat(exception).hasMessage(expectedMessage);
+  }
+
+  @Test
+  void testGetCategoryPaginationWithOderByNull() {
+
+    // given
+    String orderBy = null;
+    int pageSize = 0;
+    String expectedMessage = "The number of items per page should be between 1 and 50.";
+    // when
+    RuntimeException exception =
+        assertThrows(
             IllegalArgumentException.class,
             () -> {
-              Page<TicketDTO> ticket = ticketService.getAll(0, pageSie, text, "ASC");
+              categoryService.getAll(0, pageSize, orderBy, "ASC");
             });
     // Then
     assertThat(exception).hasMessage(expectedMessage);
@@ -228,7 +252,6 @@ class TicketServiceImplIT {
   }
 
   @Test
-  @Transactional
   void testDeleteTicket() {
     // given
     var id = "082722c7-856f-4a39-b8dd-20cb08a6996c";
@@ -239,11 +262,30 @@ class TicketServiceImplIT {
         assertThrows(
             NotFoundException.class,
             () -> {
-              var ticket = ticketService.get(id);
+              ticketService.get(id);
             });
     // Then
     assertThat(exception)
         .hasMessage(
             "The resource with reference [082722c7-856f-4a39-b8dd-20cb08a6996c] was not found.");
+  }
+
+  @Test
+  void testDeleteCategoryForValidNotFoundId() {
+    // given
+    var id = "468a89e2-acce-40b6-b356-2c134ba48f5e";
+    String expectedMessage =
+        "The resource with reference [468a89e2-acce-40b6-b356-2c134ba48f5e] was not found.";
+    // When
+    categoryService.delete(id);
+
+    RuntimeException exception =
+        assertThrows(
+            NotFoundException.class,
+            () -> {
+              categoryService.get(id);
+            });
+    // Then
+    assertThat(exception).hasMessage(expectedMessage);
   }
 }

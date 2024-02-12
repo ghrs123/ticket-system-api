@@ -1,22 +1,24 @@
 package be.congregationchretienne.ticketsystem.api.service.impl;
 
-import static be.congregationchretienne.ticketsystem.api.mapping.DepartmentMapping.INSTANCE_DEPARTMENT;
 import static be.congregationchretienne.ticketsystem.api.mapping.UserMapping.INSTANCE_USER;
 
 import be.congregationchretienne.ticketsystem.api.dto.UserDTO;
+import be.congregationchretienne.ticketsystem.api.exception.IllegalArgumentException;
+import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
+import be.congregationchretienne.ticketsystem.api.exception.PropertyReferenceException;
 import be.congregationchretienne.ticketsystem.api.helper.ValidationHelper;
 import be.congregationchretienne.ticketsystem.api.mapping.CycleAvoidingMappingContext;
 import be.congregationchretienne.ticketsystem.api.model.User;
 import be.congregationchretienne.ticketsystem.api.repository.UserRepository;
 import be.congregationchretienne.ticketsystem.api.service.UserService;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -36,7 +38,11 @@ public class UserServiceImpl extends AbstractServiceImpl<UserDTO> implements Use
   public UserDTO get(String id) {
     var uuid = checkAndConvertID(id);
 
-    Optional<User> user = repository.findById(uuid);
+    Optional<User> user =
+        Optional.ofNullable(
+            repository
+                .findById(uuid)
+                .orElseThrow(() -> new NotFoundException("User not founded.")));
 
     return INSTANCE_USER.entityToDTO(user.get(), new CycleAvoidingMappingContext());
   }
@@ -45,27 +51,50 @@ public class UserServiceImpl extends AbstractServiceImpl<UserDTO> implements Use
   @Transactional(readOnly = true)
   public Page<UserDTO> getAll(Integer page, Integer pageSize, String orderBy, String sort) {
 
-    var pageable = getPageable(page, pageSize, orderBy, sort);
-    Page<User> user = repository.findAll(pageable);
-    ValidationHelper.requireNonNull(user);
+    Pageable pageable = null;
+    Page<User> users = null;
 
-    //    return user.map(INSTANCE_USER::entityToDTO);
-    return user.map(
+    try {
+
+      pageable = getPageable(page, pageSize, orderBy, sort);
+      users = repository.findAll(pageable);
+
+    } catch (IllegalArgumentException exception) {
+
+      throw new IllegalArgumentException(exception.getMessage());
+    } catch (PropertyReferenceException exception) {
+
+      throw new PropertyReferenceException(
+          String.format("No property [%s] found for type 'User'.", orderBy));
+    }
+
+    ValidationHelper.requireNonNull(users);
+
+    return users.map(
         currentUser -> (INSTANCE_USER.entityToDTO(currentUser, new CycleAvoidingMappingContext())));
   }
 
   @Override
-  public void create(UserDTO bean) {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void create(UserDTO bean) throws IllegalArgumentException {
 
     ValidationHelper.requireNonNull(bean);
     User user = INSTANCE_USER.dtoToEntity(bean);
     user.setCreatedAt(LocalDateTime.now());
+
+    boolean present = repository.findByEmail(user.getEmail()).isPresent();
+
+    if (present) {
+      throw new IllegalArgumentException(
+          String.format("User with email [%s] already exists.", user.getEmail()));
+    }
 
     repository.save(user);
   }
 
   @Override
   public void update(UserDTO userDTO) {
+
     checkAndConvertID(userDTO.getId());
 
     repository.save(INSTANCE_USER.dtoToEntity(userDTO));
@@ -73,7 +102,12 @@ public class UserServiceImpl extends AbstractServiceImpl<UserDTO> implements Use
 
   @Override
   public void delete(String id) {
+
     var uuid = checkAndConvertID(id);
+
+    // TODO - remover as duas linhas abaixo
+    // var user = repository.findById(UUID.fromString(id));
+    // user.get().setCreatedAt(LocalDateTime.parse(user.get().getCreatedAt().toString()));
 
     repository.deleteById(uuid);
   }
