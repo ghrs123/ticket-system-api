@@ -18,6 +18,11 @@ cd existing_repo
 git remote add origin https://gitlab.com/ghrs123/ccb-ticketsystem.git
 git branch -M main
 git push -uf origin main
+
+
+Run Docker:
+docker-compose up -d --build
+
 ```
 
 ## Integrate with your tools
