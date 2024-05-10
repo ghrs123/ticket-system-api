@@ -4,11 +4,14 @@ import be.congregationchretienne.ticketsystem.api.dto.DepartmentDTO;
 import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.service.DepartmentService;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Department", description = "Department management API")
 @RestController
 @RequestMapping("/api")
 public class DepartmentController {

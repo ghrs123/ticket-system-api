@@ -4,11 +4,14 @@ import be.congregationchretienne.ticketsystem.api.dto.CategoryDTO;
 import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.service.CategoryService;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Category", description = "Category management API")
 @RestController
 @RequestMapping("/api")
 public class CategoryController {
