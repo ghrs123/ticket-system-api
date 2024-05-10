@@ -2,7 +2,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: 12345678
+    password: Bia8ha77%
     url: jdbc:mysql://localhost:3306/ticketsystemapi?autoReconnect=TRUE&useSSL=FALSE
     hikari:
       maximumPoolSize: 50
@@ -32,7 +32,30 @@ spring:
       secrect: 123
     add-properties: true
 
+
+# Logging
 logging:
   level:
     root: INFO
+    com:
+      numericaideas:  DEBUG
+    org:
+      springframework: ERROR
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+
+#springdoc:
+ # api-docs:
+   # path: /api-docs
+
+ticketsystem:
+  openapi:
+    dev-url: http://localhost:8080
+    prod-url: https://www.gustavo_santos.com
+
 
