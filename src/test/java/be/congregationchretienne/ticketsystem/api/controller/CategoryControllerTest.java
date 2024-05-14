@@ -2,6 +2,10 @@ package be.congregationchretienne.ticketsystem.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import be.congregationchretienne.ticketsystem.api.dto.CategoryDTO;
 import be.congregationchretienne.ticketsystem.api.dto.UserDTO;
@@ -23,8 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,12 +76,10 @@ class CategoryControllerTest {
     // when
     when(categoryService.get(categoryId)).thenReturn(expectedCategory);
 
-    mvc.perform(
-            MockMvcRequestBuilders.get(uri + "/{id}", categoryId)
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(categoryId))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Category"));
+    mvc.perform(get(uri + "/{id}", categoryId).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(categoryId))
+        .andExpect(jsonPath("$.name").value("Category"));
     // then
     verify(categoryService, times(1)).get(categoryId);
   }
@@ -98,21 +98,18 @@ class CategoryControllerTest {
         .thenReturn(expectedPage);
 
     mvc.perform(
-            MockMvcRequestBuilders.get(uri)
+            get(uri)
                 .param("page", Integer.toString(page))
                 .param("pageSize", Integer.toString(pageSize))
                 .param("orderBy", orderBy)
                 .param("sort", sort)
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(
-            MockMvcResultMatchers.jsonPath("$.content[0].id")
-                .value("468a89e2-acce-40b6-b356-2c134ba48f5e"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name").value("Category1"))
-        .andExpect(
-            MockMvcResultMatchers.jsonPath("$.content[1].id")
-                .value("67344fa9-9c58-4d4e-a9e6-51599f315655"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].name").value("Category2"));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].id").value("468a89e2-acce-40b6-b356-2c134ba48f5e"))
+        .andExpect(jsonPath("$.content[0].name").value("Category1"))
+        .andExpect(jsonPath("$.content[1].id").value("67344fa9-9c58-4d4e-a9e6-51599f315655"))
+        .andExpect(jsonPath("$.content[1].name").value("Category2"))
+        .andDo(print());
 
     // then
     verify(categoryService).getAll(eq(page), eq(pageSize), eq(orderBy), eq(sort));
@@ -132,21 +129,17 @@ class CategoryControllerTest {
         .thenReturn(expectedPage);
 
     mvc.perform(
-            MockMvcRequestBuilders.get(uri)
+            get(uri)
                 .param("page", Integer.toString(page))
                 .param("pageSize", Integer.toString(pageSize))
                 .param("orderBy", orderBy)
                 .param("sort", sort)
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(
-            MockMvcResultMatchers.jsonPath("$.content[0].id")
-                .value("468a89e2-acce-40b6-b356-2c134ba48f5e"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name").value("Category1"))
-        .andExpect(
-            MockMvcResultMatchers.jsonPath("$.content[1].id")
-                .value("67344fa9-9c58-4d4e-a9e6-51599f315655"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].name").value("Category2"));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].id").value("468a89e2-acce-40b6-b356-2c134ba48f5e"))
+        .andExpect(jsonPath("$.content[0].name").value("Category1"))
+        .andExpect(jsonPath("$.content[1].id").value("67344fa9-9c58-4d4e-a9e6-51599f315655"))
+        .andExpect(jsonPath("$.content[1].name").value("Category2"));
 
     // then
     verify(categoryService).getAll(eq(page), eq(pageSize), eq(orderBy), eq(sort));
