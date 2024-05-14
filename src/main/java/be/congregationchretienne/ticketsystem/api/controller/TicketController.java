@@ -3,9 +3,8 @@ package be.congregationchretienne.ticketsystem.api.controller;
 import be.congregationchretienne.ticketsystem.api.dto.TicketDTO;
 import be.congregationchretienne.ticketsystem.api.exception.NotFoundException;
 import be.congregationchretienne.ticketsystem.api.service.TicketService;
-import javax.validation.Valid;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
