@@ -26,8 +26,8 @@ services:
     environment:
       MYSQL_DATABASE: ticketsystemapi
       MYSQL_USER: root
-      MYSQL_PASSWORD: Bia8ha77%
-      MYSQL_ROOT_PASSWORD: Bia8ha77%
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
     volumes:
       - mysql-data:/var/lib/mysql
       - ./src/main/resources/db/migration/V1_0__create.sql:/data/application/V1_0__create.sql
