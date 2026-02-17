@@ -29,7 +29,7 @@ spring:
 
   devtools:
     remote:
-      secrect: 123
+      secret: 123
     add-properties: true
 
 

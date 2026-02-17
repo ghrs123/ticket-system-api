@@ -75,7 +75,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     var problem =
         new Problem.ProblemBuilder()
             .eventId(exception.getEventId())
-            .title("Resource not found.")
+            .title("Bad request.")
             .message(exception.getMessage())
             .status(BAD_REQUEST)
             .build();
@@ -93,7 +93,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     var problem =
         new Problem.ProblemBuilder()
             .eventId(exception.getEventId())
-            .title("Resource not found.")
+            .title("Invalid sort parameter.")
             .message(exception.getMessage())
             .status(BAD_REQUEST)
             .build();

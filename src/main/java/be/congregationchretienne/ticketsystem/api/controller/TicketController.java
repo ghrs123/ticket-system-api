@@ -42,22 +42,22 @@ public class TicketController {
   }
 
   @PostMapping(path = TICKET_ENDPOINT)
-  public ResponseEntity createTicket(@Valid TicketDTO TicketDTO) {
+  public ResponseEntity<Object> createTicket(@Valid @RequestBody TicketDTO ticketDTO) {
 
-    ticketService.create(TicketDTO);
+    ticketService.create(ticketDTO);
 
     return new ResponseEntity<>("The resource was successfully created.", HttpStatus.CREATED);
   }
 
   @PutMapping(path = TICKET_ENDPOINT_ID)
-  public ResponseEntity updateTicket(@Valid TicketDTO ticketDTO) {
+  public ResponseEntity<Object> updateTicket(@Valid @RequestBody TicketDTO ticketDTO) {
     ticketService.update(ticketDTO);
 
     return new ResponseEntity<>("The resource was successfully updated.", HttpStatus.OK);
   }
 
   @DeleteMapping(path = TICKET_ENDPOINT_ID)
-  public ResponseEntity deleteTicket(@PathVariable(value = "id") String id) {
+  public ResponseEntity<Object> deleteTicket(@PathVariable(value = "id") String id) {
     ticketService.delete(id);
 
     return new ResponseEntity<>("The resource was successfully deleted.", HttpStatus.OK);

@@ -45,7 +45,7 @@ public class TicketServiceImpl extends AbstractServiceImpl<TicketDTO> implements
         Optional.ofNullable(
             repository
                 .findById(uuid)
-                .orElseThrow(() -> new NotFoundException("Ticket not founded.")));
+                .orElseThrow(() -> new NotFoundException("Ticket not found.")));
 
     return INSTANCE_TICKET.entityToDTO(ticket.get(), new CycleAvoidingMappingContext());
   }

@@ -29,12 +29,21 @@ public class DepartmentController {
   @Autowired private DepartmentService departmentService;
 
   @Operation(
-          summary = "Retrieve a department by Id.",
-          description = "Get a department object by specifying its id. The response is User object and published status.")
+      summary = "Retrieve a department by Id.",
+      description =
+          "Get a department object by specifying its id. The response is User object and published status.")
   @ApiResponses({
-    @ApiResponse ( responseCode = "200", content = {@Content(schema = @Schema(implementation = UserDTO.class), mediaType = "application/json") }),
-    @ApiResponse (responseCode = "404",content = {@Content(schema = @Schema())}),
-    @ApiResponse ( responseCode = "500",content = {@Content(schema = @Schema())})
+    @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(schema = @Schema(implementation = UserDTO.class), mediaType = "application/json")
+        }),
+    @ApiResponse(
+        responseCode = "404",
+        content = {@Content(schema = @Schema())}),
+    @ApiResponse(
+        responseCode = "500",
+        content = {@Content(schema = @Schema())})
   })
   @GetMapping(path = DEPARTMENT_ENDPOINT_ID)
   public ResponseEntity<Object> getDepartment(@PathVariable(value = "id") String id)
@@ -49,16 +58,32 @@ public class DepartmentController {
       summary = "Retrieve all departments.",
       description =
           "Get all departments object. The response is a pageable list of Users object and published status.")
-  @ApiResponses ({
-    @ApiResponse ( responseCode = "200", content = { @Content(schema = @Schema(implementation = DepartmentDTO.class), mediaType = "application/json")}),
-    @ApiResponse ( responseCode = "500",content = {@Content(schema = @Schema())})
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(
+              schema = @Schema(implementation = DepartmentDTO.class),
+              mediaType = "application/json")
+        }),
+    @ApiResponse(
+        responseCode = "500",
+        content = {@Content(schema = @Schema())})
   })
   @GetMapping(path = DEPARTMENT_ENDPOINT)
   public ResponseEntity<Object> getAllDepartments(
-      @Parameter(description = "Page number, starting from 0") @RequestParam(required = false, defaultValue = "0") int page,
-      @Parameter(description = "Number of items per page")  @RequestParam(required = false, defaultValue = "20")  int pageSize,
-      @Parameter(description = "Order by a parameter of the user for example: name") @RequestParam(required = false, defaultValue = "") String orderBy,
-      @Parameter(description = "Sort by a parameter of the user for example: DESC, ASC") @RequestParam(required = false, defaultValue = "") String sort) {
+      @Parameter(description = "Page number, starting from 0")
+          @RequestParam(required = false, defaultValue = "0")
+          int page,
+      @Parameter(description = "Number of items per page")
+          @RequestParam(required = false, defaultValue = "20")
+          int pageSize,
+      @Parameter(description = "Order by a parameter of the user for example: name")
+          @RequestParam(required = false, defaultValue = "")
+          String orderBy,
+      @Parameter(description = "Sort by a parameter of the user for example: DESC, ASC")
+          @RequestParam(required = false, defaultValue = "")
+          String sort) {
 
     var departments = departmentService.getAll(page, pageSize, orderBy, sort);
 
@@ -70,7 +95,9 @@ public class DepartmentController {
       description = "Create a department object. The response is published status.")
   @ApiResponses({
     @ApiResponse(responseCode = "200"),
-    @ApiResponse(responseCode = "500",  content = {@Content(schema = @Schema())})
+    @ApiResponse(
+        responseCode = "500",
+        content = {@Content(schema = @Schema())})
   })
   @PostMapping(path = DEPARTMENT_ENDPOINT)
   public ResponseEntity createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) {
@@ -82,11 +109,16 @@ public class DepartmentController {
 
   @Operation(
       summary = "Update a department.",
-      description = "Update a department object by specifying its id. The response is Department object and published status.")
+      description =
+          "Update a department object by specifying its id. The response is Department object and published status.")
   @ApiResponses({
-    @ApiResponse( responseCode = "200"),
-    @ApiResponse( responseCode = "404", content = {@Content(schema = @Schema()) }),
-    @ApiResponse( responseCode = "500", content = {@Content(schema = @Schema()) })
+    @ApiResponse(responseCode = "200"),
+    @ApiResponse(
+        responseCode = "404",
+        content = {@Content(schema = @Schema())}),
+    @ApiResponse(
+        responseCode = "500",
+        content = {@Content(schema = @Schema())})
   })
   @PutMapping(path = DEPARTMENT_ENDPOINT)
   public ResponseEntity updateDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) {
@@ -98,10 +130,13 @@ public class DepartmentController {
 
   @Operation(
       summary = "Delete a department by Id.",
-      description = "Delete a department object by specifying its id. The response is published status.")
+      description =
+          "Delete a department object by specifying its id. The response is published status.")
   @ApiResponses({
     @ApiResponse(responseCode = "200"),
-    @ApiResponse( responseCode = "500", content = {@Content(schema = @Schema())})
+    @ApiResponse(
+        responseCode = "500",
+        content = {@Content(schema = @Schema())})
   })
   @DeleteMapping(path = DEPARTMENT_ENDPOINT_ID)
   public ResponseEntity deleteDepartment(@PathVariable(value = "id") String id) {

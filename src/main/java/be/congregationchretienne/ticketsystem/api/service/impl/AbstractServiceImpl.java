@@ -47,26 +47,16 @@ public abstract class AbstractServiceImpl<T extends AbstractDTO> implements Abst
   protected final Pageable getPageable(Integer page, Integer pageSize, String orderBy, String sort)
       throws RuntimeException {
 
-    Pageable pageable = null;
-
     if (pageSize <= 0 || pageSize > 50) {
       throw new IllegalArgumentException(
           "The number of items per page should be between 1 and 50.");
-    } else {
-      PageRequest.of(page, pageSize);
     }
 
-    if (ValidationHelper.isNotBlank(orderBy) && orderBy != null) {
-
-      pageable = PageRequest.of(page, pageSize).withSort(Sort.by(getSortDirection(sort), orderBy));
-
-    } else {
-
-      throw new IllegalArgumentException(
-          String.format("The parameter orderBy [%s] is invalid.", orderBy));
+    if (ValidationHelper.isNotBlank(orderBy)) {
+      return PageRequest.of(page, pageSize).withSort(Sort.by(getSortDirection(sort), orderBy));
     }
 
-    return pageable;
+    return PageRequest.of(page, pageSize);
   }
 
   protected final Sort.Direction getSortDirection(String sort) {
